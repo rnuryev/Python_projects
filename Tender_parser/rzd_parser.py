@@ -35,7 +35,9 @@ def get_page_data(html):
         except:
             code = ''
         try:
-            subject = tds[5].find('a').text.strip()
+            sls = tds[5].find('a').text.split('\n')
+            new_sls = list(map(str.strip, sls))
+            subject = ' '.join(new_sls)
         except:
             subject = ''
         try:
