@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
-
+# from urllib.parse import quote
 
 def get_html(url):
     r = requests.get(url)
@@ -36,8 +36,7 @@ def get_page_data(html):
             code = ''
         try:
             sls = tds[5].find('a').text.split('\n')
-            new_sls = list(map(str.strip, sls))
-            subject = ' '.join(new_sls)
+            subject = ' '.join(list(map(str.strip, sls)))
         except:
             subject = ''
         try:
@@ -52,15 +51,14 @@ def get_page_data(html):
         write_csv(data)
 
 def main():
-    url = 'http://tender.rzd.ru/tender/public/ru?cod=&deal_type=&property_type_id=&organaizer_id=&city_id=&status_type=&name=%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5&date_from=&date_to=&action=filtr&STRUCTURE_ID=4078&layer_id=&x=31&y=12&page4893_1465=1'
-    base_url = 'http://tender.rzd.ru/tender/public/ru?cod=&deal_type=&property_type_id=&organaizer_id=&city_id=&status_type='
-    query_part = '&name=%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5'
+    base_url = 'http://tender.rzd.ru/tender/public/ru?cod=&deal_type=&property_type_id=&organaizer_id=&city_id=&status_type=&name='
+    query_part = 'создание'
     additional_part = '&date_from=&date_to=&action=filtr&STRUCTURE_ID=4078&layer_id=&x=31&y=12'
     page_part = '&page4893_1465='
+    url = base_url + query_part + additional_part + page_part + '1'
     total_pages = get_total_pages(get_html(url))
     for i in range(1, total_pages+1):
         url_gen = base_url + query_part + additional_part + page_part + str(i)
-        #print(url_gen)
         get_page_data(get_html(url_gen))
 
 if __name__ == '__main__':
