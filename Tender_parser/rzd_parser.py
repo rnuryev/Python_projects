@@ -14,8 +14,8 @@ def get_total_pages(html):
     return total_pages
 
 def write_csv(data):
-    with open('rzd.csv', 'a') as f:
-        writer = csv.writer(f)
+    with open('rzd.csv', 'a', newline='') as f:
+        writer = csv.writer(f, delimiter=';')
         writer.writerow((data['date'],
                          data['code'],
                          data['subject'],

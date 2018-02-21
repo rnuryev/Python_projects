@@ -7,8 +7,8 @@ def get_html(url, ajax_data):
     return r.text
 
 def write_csv(data):
-    with open('rostech.csv', 'a') as f:
-        writer = csv.writer(f)
+    with open('rostech.csv', 'a', newline='') as f:
+        writer = csv.writer(f, delimiter=';')
         writer.writerow((data['code_tender'],
                          data['subject_tender'],
                          data['customer'],
