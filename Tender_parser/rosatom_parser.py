@@ -1,7 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
-# from urllib.parse import quote
+from datetime import date, timedelta
+from multiprocessing import Pool
 
 def get_html(url):
     r = requests.get(url)
@@ -69,16 +70,28 @@ def get_page_data(html):
 
             write_csv(data)
 
+def make_all(url):
+    html = get_html(url)
+    get_page_data(html)
+
 def main():
-    query_part = 'создание'
+    query_part = 'поставка'
+    # Добавил часть с временным промежутком в 1 неделю, показывате конкурсы, обупликованные за последнюю неделю
+    date_start = date.today() - timedelta(days=7)
+    date_end = date.today()
     base_url = 'http://www.zakupki.rosatom.ru/Web.aspx?node=currentorders&ot='
-    additional_part = '&tso=1&tsl=1&sbflag=0&ostate=P&pform=a'
-    page_part = '&page='
-    url = base_url + query_part + additional_part + page_part + '1'
+    additional_part = '&tso=1&tsl=1&sbflag=0&ostate=P'
+    date_start_part = '&pubdates='
+    date_end_part = '&pubdate='
+    page_part = '&pform=a&page='
+    url = base_url + query_part + additional_part + date_start_part + date_start.strftime('%Y%m%d') + date_end_part + date_end.strftime('%Y%m%d') + page_part + '1'
     total_pages = get_total_pages(get_html(url))
+    url_pages = []
     for i in range(1, total_pages+1):
-        url_gen = base_url + query_part + additional_part + page_part + str(i)
-        get_page_data(get_html(url_gen))
+        url_gen = base_url + query_part + additional_part + date_start_part + str(date_start) + date_end_part + str(date_end) + page_part + str(i)
+        url_pages.append(url_gen)
+    with Pool(20) as po:
+        po.map(make_all, url_pages)
 
 if __name__ == '__main__':
     main()
