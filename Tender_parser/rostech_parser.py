@@ -81,14 +81,15 @@ def main():
     url = 'https://rt-ci.ru/modules/filterTable.php'
     query_string = 'внедрение'
     ajax_data = {
-        'company': None,
-        'pt': 0,
-        'nmcs': None,
-        'nmce': None,
-        'valute': 0,
-        'ds': None,
-        'de': None,
-        'nd': None,
+# Можно оставить только поле с запросом, остальные по-умолчанию встанут нулевыми
+        # 'company': None,
+        # 'pt': 0,
+        # 'nmcs': None,
+        # 'nmce': None,
+        # 'valute': 0,
+        # 'ds': None,
+        # 'de': None,
+        # 'nd': None,
         's_search': query_string
     }
 

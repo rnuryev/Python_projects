@@ -51,7 +51,7 @@ def get_page_data(html):
         write_csv(data)
 
 def main():
-    base_url = 'http://tender.rzd.ru/tender/public/ru?cod=&deal_type=&property_type_id=&organaizer_id=&city_id=&status_type=&name='
+    base_url = 'http://tender.rzd.ru/tender/public/ru?cod=&deal_type=&property_type_id=&organaizer_id=&city_id=&status_type=1&name='
     query_part = 'создание'
     additional_part = '&date_from=&date_to=&action=filtr&STRUCTURE_ID=4078&layer_id=&x=31&y=12'
     page_part = '&page4893_1465='
