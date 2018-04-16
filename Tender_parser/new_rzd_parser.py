@@ -89,12 +89,12 @@ def get_page_data(url):
 
 if __name__ == '__main__':
     url = 'http://etzp.rzd.ru/freeccee/main?ACTION=searchProc'
-    name_text = 'внедрение'
+    name_text = 'поставка'
     # Срок подачи заявок "с":
     bid_deadlin_from = date.today().strftime('%d.%m.%Y')
     data = {
         'p_page': 0,
-        'p_page_size': 25,
+        'p_page_size': 200,
         'p_order': 'DATEENDSEARCH',
         'p_orderType': 'DESC',
         'p_org': 'all',
@@ -106,8 +106,8 @@ if __name__ == '__main__':
         'p_org_select': 'all',
         'p_cnumber': None,
         'name_text': name_text,
-        'p_dateend_begin': bid_deadlin_from,
-        'p_dateend_begin_old': bid_deadlin_from,
+        'p_dateend_begin': None,
+        'p_dateend_begin_old': None,
         'p_dateend_end': None,
         'p_dateend_end_old': None,
         'p_contest_date_oa_begin_old': None,

@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import psycopg2
+import json
 from datetime import date
 from multiprocessing import Pool
 
@@ -45,11 +46,11 @@ def write_db(data):
     cur.execute("SELECT * FROM public.tenders_tenders WHERE code=%s", (data['code'],))
     result = cur.fetchall()
     if not result:
-        cur.execute("INSERT INTO public.tenders_tenders (etp, code, subject, customer, price, deadline, link) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                (data['etp'], data['code'], data['subject'], data['customer'], data['price'], data['deadline'], data['link']))
-        tend_id = cur.fetchone()[0]
-        for d_l in data['document_links']:
-            cur.execute("INSERT INTO public.tenders_tenderdocuments (doc_title, doc_link, tender_id) VALUES (%s, %s, %s)", (d_l['doc_name'], d_l['doc_link'], tend_id))
+        cur.execute("INSERT INTO public.tenders_tenders (etp, code, subject, customer, price, deadline, link, lots, document_links) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                (data['etp'], data['code'], data['subject'], data['customer'], data['price'], data['deadline'], data['link'], json.dumps(data['lots']), json.dumps(data['document_links'])))
+        # tend_id = cur.fetchone()[0]
+        # for d_l in data['document_links']:
+        #     cur.execute("INSERT INTO public.tenders_tenderdocuments (doc_title, doc_link, tender_id) VALUES (%s, %s, %s)", (d_l['doc_name'], d_l['doc_link'], tend_id))
         conn.commit()
     conn.close()
 
@@ -77,11 +78,17 @@ def get_page_data(url):
     except:
         customer = ''
     try:
-        price = spans_tender_info[4].text.strip()
+        if spans_tender_info[4].text.strip().find('НДС') != -1:
+            price = spans_tender_info[4].text.strip()
+        else:
+            price = ''
     except:
         price = ''
     try:
-        deadline = spans_tender_info[6].text.strip()
+        if spans_tender_info[4].text.strip().find('НДС') == -1:
+            deadline = spans_tender_info[5].text.strip()
+        else:
+            deadline = spans_tender_info[6].text.strip()
     except:
         deadline = ''
     try:
@@ -98,6 +105,21 @@ def get_page_data(url):
             document_links.append(dl)
     except:
         document_links = []
+    try:
+        lots = []
+        table_lots = soup.find('table', id='listOfLots').find_all('tr', class_='tr2')
+        for tl in table_lots:
+            temp_dict = {}
+            tds = tl.find_all('td', class_='a9')
+            temp_dict['num_lot'] = tds[0].text.strip()
+            temp_dict['name_lot'] = tds[1].text.strip()
+            if tds[2].text.strip().find('НДС') != -1:
+                temp_dict['price_lot'] = tds[2].text.strip()
+            else:
+                temp_dict['price_lot'] = tds[3].text.strip()
+            lots.append(temp_dict)
+    except:
+        lots = []
     data = {
         'etp': 'РЖД',
         'code': code,
@@ -106,7 +128,8 @@ def get_page_data(url):
         'price': price,
         'deadline': deadline,
         'link': link,
-        'document_links': document_links
+        'document_links': document_links,
+        'lots': lots
     }
 
     write_db(data)
