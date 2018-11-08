@@ -1,4 +1,5 @@
 import requests
+import datetime
 from bs4 import BeautifulSoup
 import csv
 import psycopg2
@@ -47,7 +48,7 @@ def write_db(data):
     result = cur.fetchall()
     if not result:
         cur.execute("INSERT INTO public.tenders_tenders (etp, code, subject, customer, price, deadline, link, lots, document_links) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                (data['etp'], data['code'], data['subject'], data['customer'], data['price'], data['deadline'], data['link'], json.dumps(data['lots']), json.dumps(data['document_links'])))
+                (data['etp'], data['code'], data['subject'], data['customer'], data['price'], datetime.datetime.strptime(data['deadline'][0:10], '%d.%m.%Y').date(), data['link'], json.dumps(data['lots']), json.dumps(data['document_links'])))
         # tend_id = cur.fetchone()[0]
         # for d_l in data['document_links']:
         #     cur.execute("INSERT INTO public.tenders_tenderdocuments (doc_title, doc_link, tender_id) VALUES (%s, %s, %s)", (d_l['doc_name'], d_l['doc_link'], tend_id))
@@ -113,10 +114,11 @@ def get_page_data(url):
             tds = tl.find_all('td', class_='a9')
             temp_dict['num_lot'] = tds[0].text.strip()
             temp_dict['name_lot'] = tds[1].text.strip()
-            if tds[2].text.strip().find('НДС') != -1:
-                temp_dict['price_lot'] = tds[2].text.strip()
-            else:
-                temp_dict['price_lot'] = tds[3].text.strip()
+            # if tds[2].text.strip().find('НДС') != -1:
+            #     temp_dict['price_lot'] = tds[2].text.strip()
+            # else:
+            #     temp_dict['price_lot'] = tds[3].text.strip()
+            temp_dict['price_lot'] = tl.find('td', class_='a9right').text.strip()
             lots.append(temp_dict)
     except:
         lots = []
@@ -142,7 +144,7 @@ if __name__ == '__main__':
     # Срок подачи заявок "с":
     bid_deadlin_from = date.today().strftime('%d.%m.%Y')
     TYPE_SECECTS = ('OC_CKZ', 'OC_TWOSTAGE', 'OA_CKZ', 'ZK_CKZ', 'RO_CKZ')
-    # TYPE_SECECTS = ('RO_CKZ',)
+    #TYPE_SECECTS = ('RO_CKZ',)
         # p_type_select = OC_CKZ #Открытый конкурс
     # p_type_select = OC_TWOSTAGE #Открытый двухэтапный конкурс
     # p_type_select = OA_CKZ #Открытый аукцион
